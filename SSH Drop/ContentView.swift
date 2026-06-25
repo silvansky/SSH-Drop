@@ -56,7 +56,7 @@ struct ContentView: View {
                 } else {
                     VStack(spacing: 6) {
                         Image(systemName: "arrow.down.doc").imageScale(.large)
-                        Text("Drop files here").foregroundStyle(.secondary)
+                        Text("Drop files or folders here").foregroundStyle(.secondary)
                     }
                 }
             }

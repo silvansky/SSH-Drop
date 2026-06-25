@@ -27,10 +27,11 @@ enum SSHRunner {
         try await run("/usr/bin/ssh", sshOptions + [host, "mkdir -p \(shellQuote(dir))"])
     }
 
-    static func scp(local: URL, host: String, remote: String) async throws {
+    static func scp(local: URL, host: String, remote: String, recursive: Bool = false) async throws {
         // macOS scp uses the SFTP backend: the remote path is taken literally
         // (no remote shell), so it must NOT be shell-quoted.
-        try await run("/usr/bin/scp", sshOptions + [local.path, "\(host):\(remote)"])
+        let flags = recursive ? ["-r"] : []
+        try await run("/usr/bin/scp", sshOptions + flags + [local.path, "\(host):\(remote)"])
     }
 
     static func shellQuote(_ s: String) -> String {

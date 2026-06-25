@@ -101,9 +101,10 @@ final class TransferManager: ObservableObject {
         for item in uploads {
             trace("row+upload start: \(item.url.lastPathComponent)")
             let id = appendUploading(name: item.url.lastPathComponent)
-            let remote = Self.join(dir, Self.uniqueName(for: item.url.lastPathComponent, in: &used))
+            let isDir = Self.isDirectory(item.url)
+            let remote = Self.join(dir, Self.uniqueName(for: item.url.lastPathComponent, isDirectory: isDir, in: &used))
             do {
-                try await upload(item.url, to: remote, dir: dir, host: host)
+                try await upload(item.url, to: remote, dir: dir, host: host, recursive: isDir)
                 trace("upload done: \(remote)")
                 remotePaths.append(remote)
                 update(id, .done(remote))
@@ -119,10 +120,14 @@ final class TransferManager: ObservableObject {
         try? FileManager.default.removeItem(at: url.deletingLastPathComponent())
     }
 
-    private func upload(_ url: URL, to remote: String, dir: String, host: String) async throws {
+    private func upload(_ url: URL, to remote: String, dir: String, host: String, recursive: Bool) async throws {
         try await SSHRunner.mkdir(host: host, dir: dir)
         trace("mkdir done, scp start")
-        try await SSHRunner.scp(local: url, host: host, remote: remote)
+        try await SSHRunner.scp(local: url, host: host, remote: remote, recursive: recursive)
+    }
+
+    static func isDirectory(_ url: URL) -> Bool {
+        (try? url.resourceValues(forKeys: [.isDirectoryKey]).isDirectory) == true
     }
 
     private func copyToClipboard(_ string: String) {
@@ -140,19 +145,19 @@ final class TransferManager: ObservableObject {
         return f.string(from: date)
     }
 
-    static func remoteName(for original: String, timestamp: Int = Int(Date().timeIntervalSince1970)) -> String {
-        let url = URL(fileURLWithPath: original)
-        let base = url.deletingPathExtension().lastPathComponent
-        let ext = url.pathExtension
+    static func remoteName(for original: String, isDirectory: Bool = false,
+                           timestamp: Int = Int(Date().timeIntervalSince1970)) -> String {
+        // Don't split a folder name on dots (e.g. "my.assets" is not an extension).
+        let ext = isDirectory ? "" : URL(fileURLWithPath: original).pathExtension
+        let base = ext.isEmpty ? original : URL(fileURLWithPath: original).deletingPathExtension().lastPathComponent
         return ext.isEmpty ? "\(base)_\(timestamp)" : "\(base)_\(timestamp).\(ext)"
     }
 
     /// Avoids same-second collisions within a batch (e.g. two unnamed pasted images).
-    static func uniqueName(for original: String, in used: inout Set<String>) -> String {
-        let name = remoteName(for: original)
-        let url = URL(fileURLWithPath: name)
-        let stem = url.deletingPathExtension().lastPathComponent
-        let ext = url.pathExtension
+    static func uniqueName(for original: String, isDirectory: Bool, in used: inout Set<String>) -> String {
+        let name = remoteName(for: original, isDirectory: isDirectory)
+        let ext = isDirectory ? "" : URL(fileURLWithPath: name).pathExtension
+        let stem = ext.isEmpty ? name : URL(fileURLWithPath: name).deletingPathExtension().lastPathComponent
         var candidate = name
         var n = 2
         while used.contains(candidate) {
