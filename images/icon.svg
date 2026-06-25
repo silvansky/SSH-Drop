@@ -1,0 +1,90 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1024" y2="1024" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2F6E86"/>
+      <stop offset="1" stop-color="#214F63"/>
+    </linearGradient>
+    <linearGradient id="bin" x1="300" y1="0" x2="724" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="0.5" stop-color="#FAFCFD"/>
+      <stop offset="0.5" stop-color="#E6ECF0"/>
+      <stop offset="1" stop-color="#D9E1E7"/>
+    </linearGradient>
+    <linearGradient id="card" x1="0" y1="-200" x2="0" y2="160" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#EEF3F6"/>
+    </linearGradient>
+    <linearGradient id="srv" x1="0" y1="0" x2="0" y2="1" >
+      <stop offset="0" stop-color="#CDD3D8"/>
+      <stop offset="1" stop-color="#A7AFB6"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.28" r="0.7">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.10"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="sh" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="10" stdDeviation="14" flood-color="#0A2430" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+
+  <!-- background -->
+  <rect x="0" y="0" width="1024" height="1024" rx="228" fill="url(#bg)"/>
+  <rect x="0" y="0" width="1024" height="1024" rx="228" fill="url(#glow)"/>
+
+  <!-- server stack -->
+  <g filter="url(#sh)">
+    <rect x="762" y="705" width="218" height="56" rx="16" fill="url(#srv)"/>
+    <rect x="762" y="775" width="218" height="56" rx="16" fill="url(#srv)"/>
+    <rect x="762" y="845" width="218" height="56" rx="16" fill="url(#srv)"/>
+  </g>
+  <g fill="#FFFFFF" opacity="0.92">
+    <rect x="786" y="728" width="70" height="11" rx="5.5"/>
+    <rect x="786" y="798" width="70" height="11" rx="5.5"/>
+    <rect x="786" y="868" width="70" height="11" rx="5.5"/>
+  </g>
+  <g fill="#FFFFFF" opacity="0.55">
+    <circle cx="952" cy="733" r="7"/>
+    <circle cx="952" cy="803" r="7"/>
+    <circle cx="952" cy="873" r="7"/>
+  </g>
+
+  <!-- routing arrow to server -->
+  <path d="M500,864 V892 H726" fill="none" stroke="#34C9A6" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M722,867 L768,892 L722,917 Z" fill="#34C9A6"/>
+
+  <!-- inbox bin -->
+  <g filter="url(#sh)" transform="translate(512,671) scale(1.14) translate(-512,-671)">
+    <path d="M300,495
+             C360,505 470,540 512,540
+             C554,540 664,505 724,495
+             L698,818 C695,838 678,848 658,848
+             L366,848 C346,848 329,838 326,818 Z"
+          fill="url(#bin)"/>
+    <!-- inner rim shadow -->
+    <path d="M300,495 C360,505 470,540 512,540 C554,540 664,505 724,495
+             L724,521 C664,531 554,566 512,566 C470,566 360,531 300,521 Z"
+          fill="#1B4C5E" opacity="0.85"/>
+  </g>
+
+  <!-- SSH key-card emerging from the bin -->
+  <g transform="translate(512,430) rotate(-12) scale(1.18)" filter="url(#sh)">
+    <path d="M-100,-200 L70,-200 L120,-150 L120,140
+             Q120,160 100,160 L-100,160 Q-120,160 -120,140
+             L-120,-180 Q-120,-200 -100,-200 Z" fill="url(#card)"/>
+    <path d="M70,-200 L120,-150 L70,-150 Z" fill="#D4DBE1"/>
+
+    <!-- key -->
+    <g transform="translate(-12,-78) rotate(-30)" fill="#2B6177">
+      <circle cx="-34" cy="0" r="30"/>
+      <circle cx="-34" cy="0" r="12" fill="#FFFFFF"/>
+      <rect x="-10" y="-9" width="92" height="18" rx="9"/>
+      <rect x="48" y="6" width="12" height="20" rx="3"/>
+      <rect x="70" y="6" width="12" height="28" rx="3"/>
+    </g>
+
+    <!-- label -->
+    <text x="0" y="86" text-anchor="middle"
+          font-family="Helvetica, Arial, sans-serif" font-weight="800"
+          font-size="92" letter-spacing="2" fill="#2B6177">SSH</text>
+  </g>
+</svg>
