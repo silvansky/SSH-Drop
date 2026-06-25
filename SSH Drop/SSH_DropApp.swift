@@ -1,12 +1,17 @@
-//
-
 import SwiftUI
 
 @main
 struct SSH_DropApp: App {
+    @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+    @StateObject private var manager = TransferManager.shared
+
     var body: some Scene {
-        WindowGroup {
-            ContentView()
+        Window("SSH Drop", id: "main") {
+            ContentView(manager: manager)
+        }
+        .windowResizability(.contentMinSize)
+        .commands {
+            CommandGroup(replacing: .newItem) { }
         }
     }
 }
