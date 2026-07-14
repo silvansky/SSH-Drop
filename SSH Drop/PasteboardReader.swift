@@ -22,6 +22,23 @@ enum PasteboardReader {
         return "Empty"
     }
 
+    static func isRichText(_ pb: NSPasteboard = .general) -> Bool {
+        fileURLs(pb).isEmpty && pb.data(forType: .rtf) != nil
+    }
+
+    /// Forces the plain-text representation of rich-text clipboard content.
+    static func readPlainText(_ pb: NSPasteboard = .general) throws -> Payload? {
+        if let string = pb.string(forType: .string), let data = string.data(using: .utf8) {
+            return Payload(urls: [try writeTemp(data, name: "pasted_text", ext: "txt")], temp: true)
+        }
+        if let rtf = pb.data(forType: .rtf),
+           let attributed = try? NSAttributedString(data: rtf, options: [.documentType: NSAttributedString.DocumentType.rtf], documentAttributes: nil),
+           let data = attributed.string.data(using: .utf8) {
+            return Payload(urls: [try writeTemp(data, name: "pasted_text", ext: "txt")], temp: true)
+        }
+        return nil
+    }
+
     static func read(_ pb: NSPasteboard = .general) throws -> Payload? {
         let files = fileURLs(pb)
         if !files.isEmpty { return Payload(urls: files, temp: false) }

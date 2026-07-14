@@ -13,6 +13,7 @@ macOS menu utility to push files, folders, or clipboard content to a remote host
 - **Naming** — `<path>/<DD-MM-YYYY>/<name>_<timestamp>.<ext>` (folders keep their name, no extension split). Same-batch collisions get a `_2`, `_3` suffix.
 - **Result to clipboard** — remote absolute path(s) copied after upload, newline-separated.
 - **Persistence** — last host and path are remembered.
+- **Host history** — the last 5 hosts are kept; switch between destinations from the clock menu beside the Host field.
 - **Fast** — SSH connection multiplexing + pre-warming, so transfers start instantly instead of paying a handshake per drop.
 
 ## Requirements

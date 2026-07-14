@@ -10,7 +10,7 @@ macOS SwiftUI utility that copies dropped/pasted content to a remote host via `s
 
 ## Architecture
 
-- `TransferManager` (`@MainActor`, singleton `.shared`) owns host/path (persisted in UserDefaults), the transfer log, and upload orchestration. UI binds to it via `@StateObject`/`@ObservedObject`.
+- `TransferManager` (`@MainActor`, singleton `.shared`) owns host/path + host history (persisted in UserDefaults, max 5, recorded on each successful enqueue), the transfer log, and upload orchestration. UI binds to it via `@StateObject`/`@ObservedObject`.
 - `SSHRunner` wraps `Process` for `ssh`/`scp`. Uses `BatchMode=yes`, `ConnectTimeout`, and connection multiplexing (`ControlMaster=auto`, `ControlPath=/tmp/sshdrop-%C`, `ControlPersist=600`). `prewarm(host:)` opens the master so drops start instantly.
 - Upload = `ssh mkdir -p '<dir>'` then `scp <local> <host>:<remote>`.
 - `PasteboardReader` reads an `NSPasteboard` (clipboard **or** the drag pasteboard) → file URLs, or image/text data written to a unique temp dir.

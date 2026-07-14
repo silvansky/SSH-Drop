@@ -12,7 +12,20 @@ struct ContentView: View {
         VStack(spacing: 14) {
             clipboardBar
             Form {
-                TextField("Host", text: $manager.host, prompt: Text("alias or user@host"))
+                HStack {
+                    TextField("Host", text: $manager.host, prompt: Text("alias or user@host"))
+                    if !manager.hostHistory.isEmpty {
+                        Menu {
+                            ForEach(manager.hostHistory, id: \.self) { h in
+                                Button(h) { manager.selectHost(h) }
+                            }
+                        } label: {
+                            Image(systemName: "clock.arrow.circlepath")
+                        }
+                        .menuStyle(.borderlessButton)
+                        .fixedSize()
+                    }
+                }
                 TextField("Path", text: $manager.path, prompt: Text("/remote/dir"))
             }
             dropZone
@@ -26,7 +39,7 @@ struct ContentView: View {
         }
         .padding()
         .frame(minWidth: 440, minHeight: 440)
-        .background(PasteCatcher { manager.paste() })
+        .background(PasteCatcher { manager.pasteFromKeyboard() })
         .onAppear { manager.refreshPasteHint(); manager.prewarm() }
         .onReceive(hintTimer) { _ in manager.pollPasteboard() }
     }
@@ -38,6 +51,11 @@ struct ContentView: View {
                 Text(manager.pasteHint).font(.callout).lineLimit(1)
             }
             Spacer()
+            if manager.pasteIsRichText {
+                Button { manager.pastePlain() } label: {
+                    Label("Paste as plain text", systemImage: "doc.plaintext")
+                }
+            }
             Button { manager.paste() } label: {
                 Label("Paste", systemImage: "doc.on.clipboard")
             }

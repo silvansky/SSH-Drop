@@ -8,20 +8,36 @@ final class TransferManager: ObservableObject {
 
     @Published var host: String { didSet { defaults.set(host, forKey: "host") } }
     @Published var path: String { didSet { defaults.set(path, forKey: "path") } }
+    @Published var hostHistory: [String] { didSet { defaults.set(hostHistory, forKey: "hostHistory") } }
     @Published var pasteHint = "Empty"
+    @Published var pasteIsRichText = false
     @Published var log: [TransferItem] = []
     @Published var busy = false
 
     private let defaults = UserDefaults.standard
     private var lastChangeCount = NSPasteboard.general.changeCount
 
+    private static let maxHistory = 5
+
     init() {
         host = defaults.string(forKey: "host") ?? ""
         path = defaults.string(forKey: "path") ?? ""
+        hostHistory = defaults.stringArray(forKey: "hostHistory") ?? []
         SSHRunner.prewarm(host: host)
     }
 
     func prewarm() { SSHRunner.prewarm(host: host) }
+
+    func selectHost(_ h: String) {
+        host = h
+        SSHRunner.prewarm(host: h)
+    }
+
+    private func rememberHost() {
+        let h = host.trimmingCharacters(in: .whitespaces)
+        guard !h.isEmpty else { return }
+        hostHistory = Array(([h] + hostHistory.filter { $0 != h }).prefix(Self.maxHistory))
+    }
 
     struct TransferItem: Identifiable {
         let id = UUID()
@@ -39,7 +55,10 @@ final class TransferManager: ObservableObject {
 
     // MARK: Pasteboard
 
-    func refreshPasteHint() { pasteHint = PasteboardReader.hint() }
+    func refreshPasteHint() {
+        pasteHint = PasteboardReader.hint()
+        pasteIsRichText = PasteboardReader.isRichText()
+    }
 
     func pollPasteboard() {
         let count = NSPasteboard.general.changeCount
@@ -48,11 +67,21 @@ final class TransferManager: ObservableObject {
         refreshPasteHint()
     }
 
-    func paste() {
+    func paste() { paste(PasteboardReader.read) }
+
+    func pastePlain() { paste(PasteboardReader.readPlainText) }
+
+    /// ⌘V default: strip formatting from rich text, otherwise normal paste.
+    func pasteFromKeyboard() {
+        PasteboardReader.isRichText() ? pastePlain() : paste()
+    }
+
+    private func paste(_ reader: (NSPasteboard) throws -> PasteboardReader.Payload?) {
         do {
-            guard let payload = try PasteboardReader.read() else {
+            guard let payload = try reader(.general) else {
                 appendFailed(name: "Clipboard", message: "Nothing to paste"); return
             }
+            trace("paste -> \(payload.urls.map(\.pathExtension))")
             enqueue(payload.urls.map { PendingUpload(url: $0, temp: payload.temp) })
         } catch {
             appendFailed(name: "Clipboard", message: error.localizedDescription)
@@ -78,6 +107,7 @@ final class TransferManager: ObservableObject {
             for u in uploads where u.temp { removeTemp(u.url) }
             return
         }
+        rememberHost()
         let host = self.host, path = self.path
         Task { await uploadBatch(uploads, host: host, path: path) }
     }
