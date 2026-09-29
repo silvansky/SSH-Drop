@@ -1,4 +1,5 @@
 import AppKit
+import Carbon.HIToolbox
 import Combine
 import SwiftUI
 import UniformTypeIdentifiers
@@ -179,7 +180,7 @@ struct PasteCatcher: NSViewRepresentable {
 
         override func performKeyEquivalent(with event: NSEvent) -> Bool {
             let flags = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
-            if flags == .command, event.charactersIgnoringModifiers == "v" {
+            if flags == .command, event.keyCode == kVK_ANSI_V {
                 if window?.firstResponder is NSText { return false }
                 onPaste()
                 return true
